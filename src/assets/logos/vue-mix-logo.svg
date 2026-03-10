@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<svg width="1190" height="1024" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg" class="icon" version="1.1">
+ <g class="layer">
+  <title>Layer 1</title>
+  <path class="selected" d="m1187.84,390.58l-264.78,473.97l1.47,159.45l266.24,0l-2.93,-633.42zm-1187.84,633.42l267.7,0l0,-141.9l-267.7,-478.35l0,620.25zm949.39,-1024l-351.08,590.99l-359.86,-590.99l-238.45,0l267.7,495.91l327.68,527.99l0.01,0.01l326.21,-542.63l258.93,-481.28l-231.14,0z" data-spm-anchor-id="a313x.search_index.0.i0.f0583a81FPHR1W" fill="url(#svg_8)" id="svg_1" transform="matrix(1 0 0 1 0 0)"/>
+ </g>
+ <defs>
+  <radialGradient cx="0.5" cy="0.5" id="svg_8" r="1.3" spreadMethod="pad">
+   <stop id="jq_stop_5511" offset="0.02" stop-color="#1ea03f" stop-opacity="1"/>
+   <stop id="jq_stop_8032" offset="1" stop-color="#182fff" stop-opacity="1"/>
+  </radialGradient>
+ </defs>
+</svg>

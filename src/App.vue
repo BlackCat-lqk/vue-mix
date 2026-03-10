@@ -1,11 +1,27 @@
-<script setup lang="ts"></script>
-
 <template>
-  <h1>You did it!</h1>
-  <p>
-    Visit <a href="https://vuejs.org/" target="_blank" rel="noopener">vuejs.org</a> to read the
-    documentation
-  </p>
+  <div>
+    <DisplayHeader v-if="!isSidebarPage" :activeItem="activeItem" />
+    <router-view />
+  </div>
 </template>
 
-<style scoped></style>
+<script setup lang="ts">
+import DisplayHeader from "@/components/landing/Header/DisplayHeader.vue";
+import { computed } from "vue";
+import { useRoute } from "vue-router";
+
+const route = useRoute();
+
+const sidebarPages = ["/favorites"];
+const isSidebarPage = computed(() => {
+  const path = route.path;
+  return (
+    sidebarPages.some((sidebarPath) => path.includes(sidebarPath)) || /^\/[^/]+\/[^/]+$/.test(path)
+  );
+});
+
+const activeItem = computed(() => {
+  if (route.path === "/") return "home";
+  return null;
+});
+</script>
