@@ -5,7 +5,7 @@
       :wave-speed="0.05"
       :wave-frequency="1"
       :wave-amplitude="0.2"
-      :wave-color="[0.2, 0.3, 0.3]"
+      :wave-color="[0.1, 0.4, 0.3]"
       :color-num="7"
       :pixel-size="2"
       :disable-animation="false"

@@ -152,4 +152,9 @@ onUnmounted(() => {
   width: 100%;
   height: 100%;
 }
+.router-link,
+.router-link-active,
+.router-link-exact-active {
+  text-decoration: none;
+}
 </style>
