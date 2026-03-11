@@ -23,6 +23,22 @@
   z-index: 10;
 }
 
+.landing-content .bg-img {
+  position: fixed;
+  filter: blur(5px);
+  animation: bg-img 4s linear forwards;
+}
+
+@keyframes bg-img {
+  0% {
+    filter: blur(2px);
+  }
+  100% {
+    filter: blur(30px);
+  }
+
+}
+
 .landing-title {
   text-align: center;
   user-select: none;

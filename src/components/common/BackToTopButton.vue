@@ -1,6 +1,7 @@
 <template>
   <button :class="['back-to-top', { visible }]" @click="visible && scrollToTop()">
     <i class="pi pi-arrow-up" style="color: #fff; font-size: 1rem"></i>
+    返回顶部
   </button>
 </template>
 

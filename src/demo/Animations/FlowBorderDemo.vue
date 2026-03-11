@@ -10,7 +10,7 @@
         <div :class="['cyan-glow glow', colorClassNameArry[1]]"></div>
         <div :class="['purple-glow glow', colorClassNameArry[2]]"></div>
         <div :class="['white-glow glow', colorClassNameArry[3]]"></div>
-        <slot name="content"> Default text </slot>
+        <slot name="content"> Default Text </slot>
       </div>
     </template>
     <template #code>

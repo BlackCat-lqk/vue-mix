@@ -1,6 +1,8 @@
 <template>
   <div class="landing-content">
-    <img style="position: fixed" :src="VueBitsLogo" alt="logo" />
+    <div class="bg-img">
+      <img :src="VueBitsLogo" alt="logo" />
+    </div>
     <img
       :src="landingBlur"
       alt=""
