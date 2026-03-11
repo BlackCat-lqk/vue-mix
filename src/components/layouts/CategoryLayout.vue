@@ -13,6 +13,6 @@
 </template>
 
 <script setup lang="ts">
-import Header from '../navs/Header.vue';
-import Sidebar from '../navs/Sidebar.vue';
+import Header from "../navs/Header.vue";
+import Sidebar from "../navs/Sidebar.vue";
 </script>

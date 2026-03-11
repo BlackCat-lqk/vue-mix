@@ -18,3 +18,17 @@ export const getStarsCount = async (repo: string = "BlackCat-lqk/vue-mix"): Prom
     throw error;
   }
 };
+
+/**
+ * Decodes a label from kebab-case to title case
+ * @param label - The label to decode (e.g., "split-text")
+ * @returns The decoded label (e.g., "Split Text")
+ */
+export const decodeLabel = (label: string): string => {
+  if (!label) return "";
+
+  return label
+    .split("-")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+};

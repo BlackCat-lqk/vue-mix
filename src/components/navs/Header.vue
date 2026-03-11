@@ -3,6 +3,7 @@
     <div class="nav-items">
       <router-link to="/" class="logo">
         <img :src="Logo" alt="Logo" />
+        <span>Vue Mix</span>
       </router-link>
 
       <div class="flex gap-2">
@@ -16,14 +17,6 @@
       </div>
 
       <div class="desktop-nav">
-        <FadeContent blur>
-          <button class="search-button" @click="openSearch">
-            <i class="pi pi-search search-icon"></i>
-            <span class="search-text">Search Docs</span>
-            <kbd class="search-kbd">/</kbd>
-          </button>
-        </FadeContent>
-
         <div class="inline-block relative">
           <router-link
             to="/favorites"
@@ -43,7 +36,10 @@
             leave-from-class="opacity-100"
             leave-to-class="opacity-0"
           >
-            <div v-if="isTooltipVisible" class="top-full left-1/2 absolute mt-2 -translate-x-1/2 pointer-events-none">
+            <div
+              v-if="isTooltipVisible"
+              class="top-full left-1/2 absolute mt-2 -translate-x-1/2 pointer-events-none"
+            >
               <div
                 class="flex justify-center items-center bg-[#0b0b0b] px-4 py-2 border border-[#333] rounded-[50px] font-semibold text-white text-xs whitespace-nowrap"
               >
@@ -97,10 +93,19 @@
           <div class="drawer-section">
             <p class="section-title">Useful Links</p>
 
-            <router-link to="/text-animations/split-text" @click="closeDrawer" class="drawer-link">Docs</router-link>
-            <router-link to="/favorites" @click="closeDrawer" class="drawer-link">Favorites</router-link>
+            <router-link to="/text-animations/split-text" @click="closeDrawer" class="drawer-link"
+              >Docs</router-link
+            >
+            <router-link to="/favorites" @click="closeDrawer" class="drawer-link"
+              >Favorites</router-link
+            >
 
-            <a href="https://github.com/DavidHDev/vue-bits" target="_blank" @click="closeDrawer" class="drawer-link">
+            <a
+              href="https://github.com/DavidHDev/vue-bits"
+              target="_blank"
+              @click="closeDrawer"
+              class="drawer-link"
+            >
               GitHub
               <i class="pi-arrow-up-right pi arrow-icon"></i>
             </a>
@@ -111,7 +116,12 @@
           <div class="drawer-section">
             <p class="section-title">Other</p>
 
-            <a href="https://davidhaz.com/" target="_blank" @click="closeDrawer" class="drawer-link">
+            <a
+              href="https://davidhaz.com/"
+              target="_blank"
+              @click="closeDrawer"
+              class="drawer-link"
+            >
               Who made this?
               <i class="pi-arrow-up-right pi arrow-icon"></i>
             </a>
@@ -119,19 +129,17 @@
         </div>
       </div>
     </div>
-    <SearchDialog :is-open="isSearchOpen" @close="closeSearch" @open="openSearch" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed, defineComponent, h } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { useStars } from '../../composables/useStars';
-import { CATEGORIES, NEW, UPDATED } from '../../constants/Categories';
-import FadeContent from '../../content/Animations/FadeContent/FadeContent.vue';
-import Logo from '../../assets/logos/vue-bits-logo.svg';
-import Star from '../../assets/common/star.svg';
-import SearchDialog from '../common/SearchDialog.vue';
+import { ref, onMounted, onUnmounted, computed, defineComponent, h } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { useStars } from "../../composables/useStars";
+import { CATEGORIES, NEW, UPDATED } from "../../constants/Categories";
+import FadeContent from "../../content/Animations/FadeContent/FadeContent.vue";
+import Logo from "../../assets/logos/vue-mix-logo.svg";
+import Star from "../../assets/common/star.svg";
 
 const isDrawerOpen = ref(false);
 const isTransitioning = ref(false);
@@ -144,7 +152,7 @@ const isTooltipVisible = ref(false);
 const showTimeout = ref<ReturnType<typeof setTimeout> | null>(null);
 const hideTimeout = ref<ReturnType<typeof setTimeout> | null>(null);
 
-const slug = (str: string) => str.replace(/\s+/g, '-').toLowerCase();
+const slug = (str: string) => str.replace(/\s+/g, "-").toLowerCase();
 
 const toggleDrawer = () => {
   isDrawerOpen.value = !isDrawerOpen.value;
@@ -155,7 +163,7 @@ const closeDrawer = () => {
 };
 
 const openGitHub = () => {
-  window.open('https://github.com/DavidHDev/vue-bits', '_blank');
+  window.open("https://github.com/BlackCat-lqk/vue-mix", "_blank");
 };
 
 const onNavClick = () => {
@@ -192,49 +200,49 @@ const handleMobileTransitionNavigation = async (path: string) => {
 };
 
 const handleKeyDown = (e: KeyboardEvent) => {
-  if (e.key === 'Escape' && isDrawerOpen.value) {
+  if (e.key === "Escape" && isDrawerOpen.value) {
     closeDrawer();
   }
-  if (e.key === '/' && !isSearchOpen.value) {
+  if (e.key === "/" && !isSearchOpen.value) {
     e.preventDefault();
     openSearch();
   }
-  if (e.key === 'Escape' && isSearchOpen.value) {
+  if (e.key === "Escape" && isSearchOpen.value) {
     closeSearch();
   }
 };
 
 const Category = defineComponent({
-  name: 'Category',
+  name: "CategoryView",
   props: {
     category: {
       type: Object,
-      required: true
+      required: true,
     },
     location: {
       type: Object,
-      required: true
+      required: true,
     },
     handleClick: {
       type: Function,
-      required: true
+      required: true,
     },
     handleTransitionNavigation: {
       type: Function,
-      required: true
+      required: true,
     },
     onItemMouseEnter: {
       type: Function,
-      required: true
+      required: true,
     },
     onItemMouseLeave: {
       type: Function,
-      required: true
+      required: true,
     },
     isTransitioning: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
   setup(props) {
     interface ItemType {
@@ -254,44 +262,48 @@ const Category = defineComponent({
           path,
           isActive: activePath === path,
           isNew: (NEW as string[]).includes(sub),
-          isUpdated: (UPDATED as string[]).includes(sub)
+          isUpdated: (UPDATED as string[]).includes(sub),
         };
-      })
+      }),
     );
 
     return () =>
-      h('div', { class: 'category' }, [
-        h('p', { class: 'category-name' }, props.category.name),
+      h("div", { class: "category" }, [
+        h("p", { class: "category-name" }, props.category.name),
         h(
-          'div',
-          { class: 'category-items' },
+          "div",
+          { class: "category-items" },
           items.value.map(({ sub, path, isActive, isNew, isUpdated }: ItemType) => {
             return h(
-              'router-link',
+              "router-link",
               {
                 key: path,
                 to: path,
-                class: ['sidebar-item', { 'active-sidebar-item': isActive }, { transitioning: props.isTransitioning }],
+                class: [
+                  "sidebar-item",
+                  { "active-sidebar-item": isActive },
+                  { transitioning: props.isTransitioning },
+                ],
                 onClick: (e: Event) => {
                   e.preventDefault();
                   props.handleTransitionNavigation(path);
                 },
                 onMouseenter: (e: Event) => props.onItemMouseEnter(path, e),
-                onMouseleave: props.onItemMouseLeave
+                onMouseleave: props.onItemMouseLeave,
               },
               {
                 default: () =>
                   [
                     sub,
-                    isNew ? h('span', { class: 'new-tag' }, 'New') : null,
-                    isUpdated ? h('span', { class: 'updated-tag' }, 'Updated') : null
-                  ].filter(Boolean)
-              }
+                    isNew ? h("span", { class: "new-tag" }, "New") : null,
+                    isUpdated ? h("span", { class: "updated-tag" }, "Updated") : null,
+                  ].filter(Boolean),
+              },
             );
-          })
-        )
+          }),
+        ),
       ]);
-  }
+  },
 });
 
 const openSearch = () => {
@@ -303,10 +315,10 @@ const closeSearch = () => {
 };
 
 onMounted(() => {
-  document.addEventListener('keydown', handleKeyDown);
+  document.addEventListener("keydown", handleKeyDown);
 });
 
 onUnmounted(() => {
-  document.removeEventListener('keydown', handleKeyDown);
+  document.removeEventListener("keydown", handleKeyDown);
 });
 </script>

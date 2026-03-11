@@ -1,3 +1,6 @@
 @import "./reset.css";
 @import "./base.css";
 @import "./landing.css";
+@import "./sidebar.css";
+@import "./category.css";
+@import "./transitions.css";

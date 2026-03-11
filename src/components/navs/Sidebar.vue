@@ -35,7 +35,12 @@
           <p class="useful-links-title">Useful Links</p>
 
           <div class="links-container">
-            <a href="https://github.com/DavidHDev/vue-bits" target="_blank" @click="closeDrawer" class="useful-link">
+            <a
+              href="https://github.com/DavidHDev/vue-bits"
+              target="_blank"
+              @click="closeDrawer"
+              class="useful-link"
+            >
               <span>GitHub</span>
               <i class="pi-arrow-up-right pi arrow-icon"></i>
             </a>
@@ -45,7 +50,12 @@
               <i class="pi-arrow-up-right pi arrow-icon"></i>
             </router-link>
 
-            <a href="https://davidhaz.com/" target="_blank" @click="closeDrawer" class="useful-link">
+            <a
+              href="https://davidhaz.com/"
+              target="_blank"
+              @click="closeDrawer"
+              class="useful-link"
+            >
               <span>Who made this?</span>
               <i class="pi-arrow-up-right pi arrow-icon"></i>
             </a>
@@ -66,16 +76,21 @@
         class="active-line"
         :style="{
           transform:
-            isLineVisible && linePosition !== null ? `translateY(${linePosition - 8}px)` : 'translateY(-100px)',
-          opacity: isLineVisible ? 1 : 0
+            isLineVisible && linePosition !== null
+              ? `translateY(${linePosition - 8}px)`
+              : 'translateY(-100px)',
+          opacity: isLineVisible ? 1 : 0,
         }"
       ></div>
 
       <div
         class="hover-line"
         :style="{
-          transform: hoverLinePosition !== null ? `translateY(${hoverLinePosition - 8}px)` : 'translateY(-100px)',
-          opacity: isHoverLineVisible ? 1 : 0
+          transform:
+            hoverLinePosition !== null
+              ? `translateY(${hoverLinePosition - 8}px)`
+              : 'translateY(-100px)',
+          opacity: isHoverLineVisible ? 1 : 0,
         }"
       ></div>
 
@@ -98,7 +113,7 @@
 </template>
 
 <script setup lang="ts">
-import { getSavedComponents } from '@/utils/favorites';
+import { getSavedComponents } from "@/utils/favorites";
 import {
   computed,
   defineComponent,
@@ -109,12 +124,12 @@ import {
   onUnmounted,
   ref,
   useTemplateRef,
-  watch
-} from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import Logo from '../../assets/logos/vue-bits-logo.svg';
-import { CATEGORIES, NEW, UPDATED } from '../../constants/Categories';
-import '../../css/sidebar.css';
+  watch,
+} from "vue";
+import { useRoute, useRouter } from "vue-router";
+import Logo from "../../assets/logos/vue-mix-logo.svg";
+import { CATEGORIES, NEW, UPDATED } from "@/constants/Categories";
+import "../../css/sidebar.css";
 
 const HOVER_TIMEOUT_DELAY = 150;
 
@@ -127,8 +142,8 @@ const pendingActivePath = ref<string | null>(null);
 const isScrolledToBottom = ref(false);
 const isTransitioning = ref(false);
 
-const sidebarRef = useTemplateRef<HTMLDivElement>('sidebarRef');
-const sidebarContainerRef = useTemplateRef<HTMLDivElement>('sidebarContainerRef');
+const sidebarRef = useTemplateRef<HTMLDivElement>("sidebarRef");
+const sidebarContainerRef = useTemplateRef<HTMLDivElement>("sidebarContainerRef");
 
 let hoverTimeoutRef: ReturnType<typeof setTimeout> | null = null;
 let hoverDelayTimeoutRef: ReturnType<typeof setTimeout> | null = null;
@@ -138,12 +153,12 @@ const route = useRoute();
 const router = useRouter();
 
 const scrollToTop = () => window.scrollTo(0, 0);
-const slug = (str: string) => str.replace(/\s+/g, '-').toLowerCase();
+const slug = (str: string) => str.replace(/\s+/g, "-").toLowerCase();
 const toPascal = (str: string) =>
   str
-    .split('-')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join('');
+    .split("-")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join("");
 
 const findActiveElement = () => {
   const activePath = pendingActivePath.value || route.path;
@@ -257,59 +272,59 @@ const updateActiveLine = async () => {
 
 const updateSaved = () => (savedSet.value = new Set(getSavedComponents()));
 const onStorage = (e?: StorageEvent | null) => {
-  if (!e || e.key === 'savedComponents') updateSaved();
+  if (!e || e.key === "savedComponents") updateSaved();
 };
 
 onMounted(() => {
-  window.addEventListener('favorites:updated', updateSaved);
-  window.addEventListener('storage', onStorage);
+  window.addEventListener("favorites:updated", updateSaved);
+  window.addEventListener("storage", onStorage);
   updateSaved();
 });
 
 onBeforeUnmount(() => {
-  window.removeEventListener('favorites:updated', updateSaved);
-  window.removeEventListener('storage', onStorage);
+  window.removeEventListener("favorites:updated", updateSaved);
+  window.removeEventListener("storage", onStorage);
 });
 
 const Category = defineComponent({
-  name: 'Category',
+  name: "CategoryView",
   props: {
     category: {
       type: Object,
-      required: true
+      required: true,
     },
     location: {
       type: Object,
-      required: true
+      required: true,
     },
     pendingActivePath: {
       type: String,
-      default: null
+      default: null,
     },
     handleClick: {
       type: Function,
-      required: true
+      required: true,
     },
     handleTransitionNavigation: {
       type: Function,
-      required: true
+      required: true,
     },
     onItemMouseEnter: {
       type: Function,
-      required: true
+      required: true,
     },
     onItemMouseLeave: {
       type: Function,
-      required: true
+      required: true,
     },
     isTransitioning: {
       type: Boolean,
-      default: false
+      default: false,
     },
     savedSet: {
       type: Object,
-      default: () => savedSet.value
-    }
+      default: () => savedSet.value,
+    },
   },
   setup(props) {
     interface ItemType {
@@ -332,52 +347,56 @@ const Category = defineComponent({
           isActive: activePath === path,
           isNew: (NEW as string[]).includes(sub),
           isUpdated: (UPDATED as string[]).includes(sub),
-          isFavorited: savedSet.value?.has?.(favoriteKey)
+          isFavorited: savedSet.value?.has?.(favoriteKey),
         };
-      })
+      }),
     );
 
     return () =>
-      h('div', { class: 'category' }, [
-        h('p', { class: 'category-name' }, props.category.name),
+      h("div", { class: "category" }, [
+        h("p", { class: "category-name" }, props.category.name),
         h(
-          'div',
-          { class: 'category-items' },
+          "div",
+          { class: "category-items" },
           items.value.map(({ sub, path, isActive, isNew, isUpdated, isFavorited }: ItemType) => {
             return h(
-              'router-link',
+              "router-link",
               {
                 key: path,
                 to: path,
-                class: ['sidebar-item', { 'active-sidebar-item': isActive }, { transitioning: props.isTransitioning }],
+                class: [
+                  "sidebar-item",
+                  { "active-sidebar-item": isActive },
+                  { transitioning: props.isTransitioning },
+                ],
                 onClick: (e: Event) => {
                   e.preventDefault();
                   props.handleTransitionNavigation(path);
                 },
                 onMouseenter: (e: Event) => props.onItemMouseEnter(path, e),
-                onMouseleave: props.onItemMouseLeave
+                onMouseleave: props.onItemMouseLeave,
               },
               {
                 default: () =>
                   [
                     sub,
-                    isNew ? h('span', { class: 'new-tag' }, 'New') : null,
-                    isUpdated ? h('span', { class: 'updated-tag' }, 'Updated') : null,
+                    isNew ? h("span", { class: "new-tag" }, "New") : null,
+                    isUpdated ? h("span", { class: "updated-tag" }, "Updated") : null,
                     isFavorited
-                      ? h('i', {
-                          class: 'pi pi-heart-fill footer-heart',
+                      ? h("i", {
+                          class: "pi pi-heart-fill footer-heart",
                           style: {
-                            marginLeft: '6px'
-                          }
+                            marginLeft: "6px",
+                          },
                         })
-                      : null
-                  ].filter(Boolean)
-              }
+                      : null,
+                  ].filter(Boolean),
+              },
             );
-          })
-        )
+          }),
+        ),
       ]);
-  }
+  },
 });
 
 watch(() => route.path, updateActiveLine);
@@ -386,7 +405,7 @@ watch(pendingActivePath, updateActiveLine);
 onMounted(() => {
   updateActiveLine();
   if (sidebarContainerRef.value) {
-    sidebarContainerRef.value.addEventListener('scroll', handleScroll);
+    sidebarContainerRef.value.addEventListener("scroll", handleScroll);
     handleScroll();
   }
 });
@@ -395,7 +414,7 @@ onUnmounted(() => {
   if (hoverTimeoutRef) clearTimeout(hoverTimeoutRef);
   if (hoverDelayTimeoutRef) clearTimeout(hoverDelayTimeoutRef);
   if (sidebarContainerRef.value) {
-    sidebarContainerRef.value.removeEventListener('scroll', handleScroll);
+    sidebarContainerRef.value.removeEventListener("scroll", handleScroll);
   }
 });
 </script>

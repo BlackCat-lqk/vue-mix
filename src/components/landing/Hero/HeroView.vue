@@ -1,5 +1,6 @@
 <template>
   <div class="landing-content">
+    <img style="position: fixed" :src="VueBitsLogo" alt="logo" />
     <img
       :src="landingBlur"
       alt=""
@@ -86,6 +87,7 @@
 </template>
 
 <script setup lang="ts">
+import VueBitsLogo from "@/assets/logos/vue-mix-logo.svg";
 import SplitText from "@/components/landing/SplitText/SplitText.vue";
 import { defineComponent, h, onMounted, onUnmounted, ref } from "vue";
 import landingBlur from "../../../assets/common/landing-blur.svg";

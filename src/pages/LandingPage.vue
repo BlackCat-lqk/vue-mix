@@ -28,7 +28,7 @@ const checkIsMobile = () => {
 };
 
 onMounted(() => {
-  document.title = "Vue Bits - Animated UI Components For Vue";
+  document.title = "Vue Bits - Components For Vue";
   window.scrollTo(0, 0);
   checkIsMobile();
   window.addEventListener("resize", checkIsMobile);
