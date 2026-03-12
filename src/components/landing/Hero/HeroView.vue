@@ -3,84 +3,40 @@
     <div class="bg-img">
       <img :src="VueBitsLogo" alt="logo" />
     </div>
-    <img
-      :src="landingBlur"
-      alt=""
-      aria-hidden="true"
-      class="landing-gradient-blur"
-      draggable="false"
-      :style="{ zIndex: 5 }"
-    />
+    <img :src="landingBlur" alt="" aria-hidden="true" class="landing-gradient-blur" draggable="false"
+      :style="{ zIndex: 5 }" />
 
-    <img
-      :src="landingBlur"
-      alt=""
-      aria-hidden="true"
-      class="landing-gradient-blur"
-      draggable="false"
-      :style="{ zIndex: 5 }"
-    />
+    <img :src="landingBlur" alt="" aria-hidden="true" class="landing-gradient-blur" draggable="false"
+      :style="{ zIndex: 5 }" />
 
     <div class="hero-main-content">
-      <router-link to="/backgrounds/grainient" class="hero-new-badge-container">
+      <router-link to="/animations/flow-border" class="hero-new-badge-container">
         <span class="hero-new-badge">New 🎉</span>
         <div class="hero-new-badge-text">
-          <span>Grainient</span>
+          <span>Flow Border</span>
           <i class="pi-arrow-right pi" style="font-size: 0.8rem"></i>
         </div>
       </router-link>
 
       <h1 class="landing-title">
-        <ResponsiveSplitText
-          :is-mobile="isMobile"
-          text="Vue Components"
-          class-name="hero-split"
-          split-type="chars"
-          :delay="30"
-          :duration="2"
-          ease="elastic.out(0.5, 0.3)"
-        />
+        <ResponsiveSplitText :is-mobile="isMobile" text="Vue Components" class-name="hero-split" split-type="chars"
+          :delay="30" :duration="2" ease="elastic.out(0.5, 0.3)" />
 
         <br />
 
-        <ResponsiveSplitText
-          :is-mobile="isMobile"
-          text="For Creative Developers"
-          class-name="hero-split"
-          split-type="chars"
-          :delay="30"
-          :duration="2"
-          ease="elastic.out(0.5, 0.3)"
-        />
+        <ResponsiveSplitText :is-mobile="isMobile" text="For Creative Developers" class-name="hero-split"
+          split-type="chars" :delay="30" :duration="2" ease="elastic.out(0.5, 0.3)" />
       </h1>
 
-      <ResponsiveSplitText
-        :is-mobile="isMobile"
-        class-name="landing-subtitle"
-        split-type="words"
-        :delay="25"
-        :duration="1"
-        text="Highly customizable components that make your Vue projects truly stand out"
-      />
+      <ResponsiveSplitText :is-mobile="isMobile" class-name="landing-subtitle" split-type="words" :delay="25"
+        :duration="1" text="Highly customizable components that make your Vue projects truly stand out" />
 
       <router-link to="/animations/flow-border" class="landing-button">
         <span>Browse Components</span>
 
         <div class="button-arrow-circle">
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 16 16"
-            fill="#ffffff"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M6 12L10 8L6 4"
-              stroke="#0b0b0b"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="#ffffff" xmlns="http://www.w3.org/2000/svg">
+            <path d="M6 12L10 8L6 4" stroke="#0b0b0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
           </svg>
         </div>
       </router-link>
@@ -156,6 +112,7 @@ onUnmounted(() => {
   width: 100%;
   height: 100%;
 }
+
 .router-link,
 .router-link-active,
 .router-link-exact-active {

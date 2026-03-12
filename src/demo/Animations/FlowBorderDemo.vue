@@ -13,11 +13,11 @@
       <Customize>
         <PreviewText title="Text" v-model="text" />
 
-        <PreviewColor title="Color1" v-model="color[0]" />
+        <PreviewColor title="Color1" v-model="color1" />
 
-        <PreviewColor title="Color2" v-model="color[1]" />
+        <PreviewColor title="Color2" v-model="color2" />
 
-        <PreviewColor title="Color3" v-model="color[2]" />
+        <PreviewColor title="Color3" v-model="color3" />
 
         <PreviewSlider title="Line Size" v-model="lineSize" :min="1" :max="20" :step="1" />
 
@@ -42,7 +42,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import TabbedLayout from "@/components/common/TabbedLayout.vue";
 import GradientFlow from "@/content/Animations/GradientFlow/GradientFlow.vue";
 import CodeExample from "@/components/code/CodeExample.vue";
@@ -62,6 +62,16 @@ const color = ref(['#ff7dd6', '#3dfcff', '#a193f6']);
 const speed = ref(4);
 const enableHalo = ref(true);
 const enableAnimation = ref(true);
+const color1 = ref('#ff7dd6');
+const color2 = ref('#3dfcff');
+const color3 = ref('#a193f6');
+
+watch(
+  () => [color1.value, color2.value, color3.value],
+  () => {
+    color.value = [color1.value, color2.value, color3.value];
+  }
+);
 
 const propData = [
   {

@@ -1,13 +1,5 @@
 // Highlighted sidebar items
-export const NEW = [
-  "Color Bends",
-  "Floating Lines",
-  "Light Pillar",
-  "Antigravity",
-  "Reflective Card",
-  "Pixel Snow",
-  "Grainient",
-];
+export const NEW = ["Flow Border"];
 export const UPDATED = ["Metallic Paint"];
 
 // Used for main sidebar navigation
