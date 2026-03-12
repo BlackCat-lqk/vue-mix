@@ -28,13 +28,13 @@ const bugReportUrl = computed(() => {
   const category = route.params.category;
   const subcategory = route.params.subcategory;
   const title = encodeURIComponent(`[BUG]: ${category}/${subcategory}`);
-  return `https://github.com/DavidHDev/vue-bits/issues/new?template=1-bug-report.yml&title=${title}&labels=bug`;
+  return `https://github.com/BlackCat-lqk/vue-mix/issues/new?template=1-bug-report.yml&title=${title}&labels=bug`;
 });
 
 const featureRequestUrl = computed(() => {
   const category = route.params.category;
   const subcategory = route.params.subcategory;
   const title = encodeURIComponent(`[FEAT]: ${category}/${subcategory}`);
-  return `https://github.com/DavidHDev/vue-bits/issues/new?template=2-feature-request.yml&title=${title}&labels=enhancement`;
+  return `https://github.com/BlackCat-lqk/vue-mix/issues/new?template=2-feature-request.yml&title=${title}&labels=enhancement`;
 });
 </script>

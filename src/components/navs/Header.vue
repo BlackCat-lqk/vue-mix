@@ -18,31 +18,17 @@
 
       <div class="desktop-nav">
         <div class="inline-block relative">
-          <router-link
-            to="/favorites"
-            @mouseenter="showTooltip"
-            @mouseleave="hideTooltip"
-            aria-label="Favorites"
-            class="flex justify-center items-center bg-linear-to-br from-[#1ea03f] to-[#182fff99] hover:brightness-110 active:brightness-95 rounded-full w-10 h-10 transition-all duration-200 cursor-pointer"
-          >
+          <router-link to="/favorites" @mouseenter="showTooltip" @mouseleave="hideTooltip" aria-label="Favorites"
+            class="flex justify-center items-center bg-linear-to-br from-[#1ea03f] to-[#182fff99] hover:brightness-110 active:brightness-95 rounded-full w-10 h-10 transition-all duration-200 cursor-pointer">
             <i class="pi pi-heart-fill" :style="{ color: '#ffffff' }"></i>
           </router-link>
 
-          <Transition
-            enter-active-class="transition-opacity duration-200"
-            leave-active-class="transition-opacity duration-100"
-            enter-from-class="opacity-0"
-            enter-to-class="opacity-100"
-            leave-from-class="opacity-100"
-            leave-to-class="opacity-0"
-          >
-            <div
-              v-if="isTooltipVisible"
-              class="top-full left-1/2 absolute mt-2 -translate-x-1/2 pointer-events-none"
-            >
+          <Transition enter-active-class="transition-opacity duration-200"
+            leave-active-class="transition-opacity duration-100" enter-from-class="opacity-0"
+            enter-to-class="opacity-100" leave-from-class="opacity-100" leave-to-class="opacity-0">
+            <div v-if="isTooltipVisible" class="top-full left-1/2 absolute mt-2 -translate-x-1/2 pointer-events-none">
               <div
-                class="flex justify-center items-center bg-[#0b0b0b] px-4 py-2 border border-[#333] rounded-[50px] font-semibold text-white text-xs whitespace-nowrap"
-              >
+                class="flex justify-center items-center bg-[#0b0b0b] px-4 py-2 border border-[#333] rounded-[50px] font-semibold text-white text-xs whitespace-nowrap">
                 Favorites
               </div>
             </div>
@@ -74,17 +60,9 @@
         <div class="drawer-body">
           <div class="drawer-navigation">
             <div class="categories-container">
-              <Category
-                v-for="cat in CATEGORIES"
-                :key="cat.name"
-                :category="cat"
-                :location="route"
-                :handle-click="onNavClick"
-                :handle-transition-navigation="handleMobileTransitionNavigation"
-                :on-item-mouse-enter="() => {}"
-                :on-item-mouse-leave="() => {}"
-                :is-transitioning="isTransitioning"
-              />
+              <Category v-for="cat in CATEGORIES" :key="cat.name" :category="cat" :location="route"
+                :handle-click="onNavClick" :handle-transition-navigation="handleMobileTransitionNavigation"
+                :on-item-mouse-enter="() => { }" :on-item-mouse-leave="() => { }" :is-transitioning="isTransitioning" />
             </div>
           </div>
 
@@ -93,19 +71,10 @@
           <div class="drawer-section">
             <p class="section-title">Useful Links</p>
 
-            <router-link to="/text-animations/split-text" @click="closeDrawer" class="drawer-link"
-              >Docs</router-link
-            >
-            <router-link to="/favorites" @click="closeDrawer" class="drawer-link"
-              >Favorites</router-link
-            >
+            <router-link to="/animations/flow-border" @click="closeDrawer" class="drawer-link">Docs</router-link>
+            <router-link to="/favorites" @click="closeDrawer" class="drawer-link">Favorites</router-link>
 
-            <a
-              href="https://github.com/DavidHDev/vue-bits"
-              target="_blank"
-              @click="closeDrawer"
-              class="drawer-link"
-            >
+            <a href="https://github.com/BlackCat-lqk/vue-mix" target="_blank" @click="closeDrawer" class="drawer-link">
               GitHub
               <i class="pi-arrow-up-right pi arrow-icon"></i>
             </a>
@@ -116,12 +85,7 @@
           <div class="drawer-section">
             <p class="section-title">Other</p>
 
-            <a
-              href="https://davidhaz.com/"
-              target="_blank"
-              @click="closeDrawer"
-              class="drawer-link"
-            >
+            <a href="https://davidhaz.com/" target="_blank" @click="closeDrawer" class="drawer-link">
               Who made this?
               <i class="pi-arrow-up-right pi arrow-icon"></i>
             </a>

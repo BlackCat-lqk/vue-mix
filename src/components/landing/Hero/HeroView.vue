@@ -63,7 +63,7 @@
         text="Highly customizable components that make your Vue projects truly stand out"
       />
 
-      <router-link to="/text-animations/split-text" class="landing-button">
+      <router-link to="/animations/flow-border" class="landing-button">
         <span>Browse Components</span>
 
         <div class="button-arrow-circle">

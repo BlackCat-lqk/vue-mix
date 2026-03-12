@@ -12,10 +12,10 @@ export const UPDATED = ["Metallic Paint"];
 
 // Used for main sidebar navigation
 export const CATEGORIES = [
-  {
-    name: "Get Started",
-    subcategories: ["Index"],
-  },
+  // {
+  //   name: "Get Started",
+  //   subcategories: ["Index"],
+  // },
   {
     name: "Animations",
     subcategories: ["Flow Border"],

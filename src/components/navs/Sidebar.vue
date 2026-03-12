@@ -15,18 +15,10 @@
 
       <div class="drawer-body">
         <div class="categories-container">
-          <Category
-            v-for="cat in CATEGORIES"
-            :key="cat.name"
-            :category="cat"
-            :location="route"
-            :pending-active-path="pendingActivePath ?? undefined"
-            :handle-click="onNavClick"
-            :handle-transition-navigation="handleMobileTransitionNavigation"
-            :on-item-mouse-enter="() => {}"
-            :on-item-mouse-leave="() => {}"
-            :is-transitioning="isTransitioning"
-          />
+          <Category v-for="cat in CATEGORIES" :key="cat.name" :category="cat" :location="route"
+            :pending-active-path="pendingActivePath ?? undefined" :handle-click="onNavClick"
+            :handle-transition-navigation="handleMobileTransitionNavigation" :on-item-mouse-enter="() => { }"
+            :on-item-mouse-leave="() => { }" :is-transitioning="isTransitioning" />
         </div>
 
         <div class="separator"></div>
@@ -35,27 +27,17 @@
           <p class="useful-links-title">Useful Links</p>
 
           <div class="links-container">
-            <a
-              href="https://github.com/DavidHDev/vue-bits"
-              target="_blank"
-              @click="closeDrawer"
-              class="useful-link"
-            >
+            <a href="https://github.com/BlackCat-lqk/vue-mix" target="_blank" @click="closeDrawer" class="useful-link">
               <span>GitHub</span>
               <i class="pi-arrow-up-right pi arrow-icon"></i>
             </a>
 
-            <router-link to="/text-animations/split-text" @click="closeDrawer" class="useful-link">
+            <router-link to="/animations/flow-border" @click="closeDrawer" class="useful-link">
               <span>Docs</span>
               <i class="pi-arrow-up-right pi arrow-icon"></i>
             </router-link>
 
-            <a
-              href="https://davidhaz.com/"
-              target="_blank"
-              @click="closeDrawer"
-              class="useful-link"
-            >
+            <a href="https://davidhaz.com/" target="_blank" @click="closeDrawer" class="useful-link">
               <span>Who made this?</span>
               <i class="pi-arrow-up-right pi arrow-icon"></i>
             </a>
@@ -65,48 +47,30 @@
     </div>
   </div>
 
-  <nav
-    ref="sidebarContainerRef"
-    class="sidebar"
-    :class="{ 'sidebar-no-fade': isScrolledToBottom }"
-    @scroll="handleScroll"
-  >
+  <nav ref="sidebarContainerRef" class="sidebar" :class="{ 'sidebar-no-fade': isScrolledToBottom }"
+    @scroll="handleScroll">
     <div ref="sidebarRef" class="sidebar-content">
-      <div
-        class="active-line"
-        :style="{
-          transform:
-            isLineVisible && linePosition !== null
-              ? `translateY(${linePosition - 8}px)`
-              : 'translateY(-100px)',
-          opacity: isLineVisible ? 1 : 0,
-        }"
-      ></div>
+      <div class="active-line" :style="{
+        transform:
+          isLineVisible && linePosition !== null
+            ? `translateY(${linePosition - 8}px)`
+            : 'translateY(-100px)',
+        opacity: isLineVisible ? 1 : 0,
+      }"></div>
 
-      <div
-        class="hover-line"
-        :style="{
-          transform:
-            hoverLinePosition !== null
-              ? `translateY(${hoverLinePosition - 8}px)`
-              : 'translateY(-100px)',
-          opacity: isHoverLineVisible ? 1 : 0,
-        }"
-      ></div>
+      <div class="hover-line" :style="{
+        transform:
+          hoverLinePosition !== null
+            ? `translateY(${hoverLinePosition - 8}px)`
+            : 'translateY(-100px)',
+        opacity: isHoverLineVisible ? 1 : 0,
+      }"></div>
 
       <div class="categories-list">
-        <Category
-          v-for="cat in CATEGORIES"
-          :key="cat.name"
-          :category="cat"
-          :location="route"
-          :pending-active-path="pendingActivePath ?? undefined"
-          :handle-click="scrollToTop"
-          :handle-transition-navigation="handleTransitionNavigation"
-          :on-item-mouse-enter="onItemEnter"
-          :on-item-mouse-leave="onItemLeave"
-          :is-transitioning="isTransitioning"
-        />
+        <Category v-for="cat in CATEGORIES" :key="cat.name" :category="cat" :location="route"
+          :pending-active-path="pendingActivePath ?? undefined" :handle-click="scrollToTop"
+          :handle-transition-navigation="handleTransitionNavigation" :on-item-mouse-enter="onItemEnter"
+          :on-item-mouse-leave="onItemLeave" :is-transitioning="isTransitioning" />
       </div>
     </div>
   </nav>
@@ -384,11 +348,11 @@ const Category = defineComponent({
                     isUpdated ? h("span", { class: "updated-tag" }, "Updated") : null,
                     isFavorited
                       ? h("i", {
-                          class: "pi pi-heart-fill footer-heart",
-                          style: {
-                            marginLeft: "6px",
-                          },
-                        })
+                        class: "pi pi-heart-fill footer-heart",
+                        style: {
+                          marginLeft: "6px",
+                        },
+                      })
                       : null,
                   ].filter(Boolean),
               },

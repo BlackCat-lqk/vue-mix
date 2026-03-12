@@ -12,7 +12,7 @@
             >Home</router-link
           >
 
-          <router-link class="nav-link" to="/text-animations/split-text">Docs</router-link>
+          <router-link class="nav-link" to="/animations/flow-border">Docs</router-link>
         </nav>
 
         <button class="cta-button" @click="openGitHub">
