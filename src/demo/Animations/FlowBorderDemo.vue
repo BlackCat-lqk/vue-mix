@@ -59,7 +59,7 @@ import CliInstallation from '@/components/code/CliInstallation.vue';
 const text = ref('Hello, world!');
 const lineSize = ref(4);
 const color = ref(['#ff7dd6', '#3dfcff', '#a193f6']);
-const speed = ref(4);
+const speed = ref(3);
 const enableHalo = ref(true);
 const enableAnimation = ref(true);
 const color1 = ref('#ff7dd6');

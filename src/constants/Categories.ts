@@ -10,6 +10,6 @@ export const CATEGORIES = [
   // },
   {
     name: "Animations",
-    subcategories: ["Flow Border"],
+    subcategories: ["Flow Border", "Liquid Glass"],
   },
 ];
