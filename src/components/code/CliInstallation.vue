@@ -6,7 +6,7 @@
       :copy-button="true" class="code-block" />
 
     <p class="jsrepo-info">
-      Vue Bits uses
+      Vue Mix uses
       <strong>jsrepo</strong>
       to help you install components via CLI commands. Learn more about it
       <a href="https://jsrepo.dev/" target="_blank" rel="noreferrer">here</a>

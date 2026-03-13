@@ -115,8 +115,8 @@ const propData = [
 
 <style scoped>
 .gradient-box {
-  width: 80%;
-  height: 80px;
+  width: 60%;
+  height: 200px;
   color: #fff;
   border-radius: 40px;
   font-size: 18px;
