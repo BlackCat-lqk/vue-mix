@@ -12,4 +12,8 @@ export const CATEGORIES = [
     name: "Animations",
     subcategories: ["Flow Border", "Liquid Glass"],
   },
+  {
+    name: "Components",
+    subcategories: ["Rubber Band"],
+  },
 ];
