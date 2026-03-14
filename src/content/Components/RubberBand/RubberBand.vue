@@ -1,314 +1,156 @@
 <template>
   <div class="rubber-band-container">
-    <!-- 橡皮筋线条 -->
-    <div class="rubber-band-line" ref="lineRef" :style="{ backgroundColor: color }"></div>
-
-    <!-- 固定锚点 -->
-    <div class="rubber-band-anchor" ref="anchorRef" :style="{ backgroundColor: color }"></div>
-
-    <!-- 拖拽点（透明交互区域） -->
-    <div class="rubber-band-dragger" ref="draggerRef" @mousedown="handleMouseDown"></div>
+    <svg width="100%" height="100%" viewBox="0 0 800 400">
+      <line
+        id="rubber-band"
+        x1="50%"
+        y1="0%"
+        :x2="pointX"
+        :y2="pointY"
+        :stroke="lineColor"
+        :stroke-width="lineWidth"
+        stroke-linecap="round"
+      />
+      <circle cx="50%" cy="0%" r="4" fill="gray" />
+      <foreignObject
+        :x="pointX"
+        :y="pointY"
+        width="50"
+        height="50"
+        requiredExtensions="http://www.w3.org/1999/xhtml"
+      >
+        <div xmlns="http://www.w3.org/1999/xhtml" class="image-container">
+          <img
+            src="@/assets/logos/vue-mix-logo.svg"
+            alt="draggable"
+            class="draggable-image"
+            @mousedown="startDrag"
+            :cursor="isDragging ? 'grabbing' : 'grab'"
+            :class="{ dragging: isDragging }"
+          />
+        </div>
+      </foreignObject>
+      <defs>
+        <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+          <feDropShadow dx="2" dy="2" stdDeviation="2" flood-opacity="0.3" />
+        </filter>
+      </defs>
+    </svg>
   </div>
 </template>
 
-<script lang="ts" setup>
-import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
-import gsap from 'gsap'
+<script setup lang="ts">
+import { ref, computed, onUnmounted } from "vue";
+import gsap from "gsap";
 
-// ---------- Props 定义 ----------
-const props = defineProps({
-  // 橡皮筋颜色
-  color: {
-    type: String,
-    default: '#ff6b6b'
-  },
-  // 锚点大小
-  anchorSize: {
-    type: Number,
-    default: 20
-  },
-  // 线条粗细
-  lineThickness: {
-    type: Number,
-    default: 4
-  },
-  // 弹性强度 (1 = 标准, 越大回弹越猛)
-  elasticity: {
-    type: Number,
-    default: 1
-  },
-  // 是否默认激活
-  active: {
-    type: Boolean,
-    default: true
-  }
-})
+const pointX = ref(400);
+const pointY = ref(200);
+const isDragging = ref(false);
+const lineWidth = ref(10);
 
-// ---------- 事件发射 ----------
-const emit = defineEmits(['drag-start', 'drag-move', 'drag-end', 'reset'])
+let dragAnimation: gsap.core.Tween | null = null;
 
-// ---------- DOM 元素引用 ----------
-const lineRef = ref(null)
-const anchorRef = ref(null)
-const draggerRef = ref(null)
+// 计算线的颜色 - 根据拉伸程度变化
+const lineColor = computed(() => {
+  const distance = Math.sqrt(Math.pow(pointX.value - 100, 2) + Math.pow(pointY.value - 200, 2));
+  // 距离越远颜色越深
+  const intensity = Math.min(distance / 200, 1);
+  return `rgba(139, 69, 19, ${0.5 + intensity * 0.5})`;
+});
 
-// ---------- 状态管理 ----------
-const anchorPosition = ref({ x: 0, y: 0 }) // 锚点中心坐标
-const isDragging = ref(false)
-let gsapContext // 用于批量清理GSAP动画
-let mouseMoveHandler = null
-let mouseUpHandler = null
-
-// ---------- 初始化位置 ----------
-const updateAnchorPosition = () => {
-  if (!anchorRef.value) return
-
-  const rect = anchorRef.value.getBoundingClientRect()
-  anchorPosition.value = {
-    x: rect.left + rect.width / 2,
-    y: rect.top + rect.height / 2
+const startDrag = (e: MouseEvent) => {
+  if (dragAnimation) {
+    dragAnimation.kill();
+    dragAnimation = null;
   }
 
-  // 同步拖拽点和线条的起始位置
-  if (!isDragging.value) {
-    gsap.set(draggerRef.value, {
-      x: anchorPosition.value.x,
-      y: anchorPosition.value.y
-    })
-    gsap.set(lineRef.value, {
-      x: anchorPosition.value.x,
-      y: anchorPosition.value.y,
-      width: 0,
-      rotation: 0
-    })
+  isDragging.value = true;
+  e.preventDefault();
+
+  // 拖拽时线变细
+  gsap.to(lineWidth, {
+    duration: 0.2,
+    value: 2,
+    ease: "power2.out",
+  });
+
+  window.addEventListener("mousemove", onDrag);
+  window.addEventListener("mouseup", stopDrag);
+};
+
+const onDrag = (e: MouseEvent) => {
+  if (!isDragging.value) return;
+
+  const svg = document.querySelector("svg");
+  if (!svg) return;
+
+  const pt = svg.createSVGPoint();
+  pt.x = e.clientX;
+  pt.y = e.clientY;
+
+  const ctm = svg.getScreenCTM();
+  if (ctm) {
+    const svgP = pt.matrixTransform(ctm.inverse());
+
+    // 可以限制拖拽范围（可选）
+    // pointX.value = Math.min(700, Math.max(100, svgP.x))
+    // pointY.value = Math.min(350, Math.max(50, svgP.y))
+
+    pointX.value = svgP.x;
+    pointY.value = svgP.y;
   }
-}
+};
 
-// ---------- 更新线条（基于当前拖拽点位置）----------
-const updateLine = (draggerX, draggerY) => {
-  if (!lineRef.value) return
+const stopDrag = () => {
+  if (!isDragging.value) return;
 
-  const dx = draggerX - anchorPosition.value.x
-  const dy = draggerY - anchorPosition.value.y
-  const distance = Math.sqrt(dx * dx + dy * dy)
-  const angle = Math.atan2(dy, dx) * 180 / Math.PI
+  isDragging.value = false;
+  window.removeEventListener("mousemove", onDrag);
+  window.removeEventListener("mouseup", stopDrag);
 
-  gsap.set(lineRef.value, {
-    width: distance,
-    rotation: angle
-  })
-}
+  // 恢复线宽
+  gsap.to(lineWidth, {
+    duration: 1.8,
+    value: 10,
+    ease: "power2.in",
+  });
 
-// ---------- 事件处理 ----------
-const handleMouseDown = (e) => {
-  if (!props.active) return
-
-  isDragging.value = true
-  e.preventDefault()
-  emit('drag-start', e)
-
-  // 创建GSAP上下文以便后续清理
-  gsapContext = gsap.context(() => { }, draggerRef.value)
-
-  // 添加全局事件监听
-  mouseMoveHandler = (e) => {
-    if (!isDragging.value) return
-
-    // 更新拖拽点位置
-    gsap.set(draggerRef.value, {
-      x: e.clientX,
-      y: e.clientY
-    })
-
-    // 更新线条
-    updateLine(e.clientX, e.clientY)
-
-    emit('drag-move', { x: e.clientX, y: e.clientY })
-  }
-
-  mouseUpHandler = () => {
-    if (!isDragging.value) return
-    handleMouseUp()
-  }
-
-  window.addEventListener('mousemove', mouseMoveHandler)
-  window.addEventListener('mouseup', mouseUpHandler)
-}
-
-const handleMouseUp = () => {
-  if (!isDragging.value) return
-
-  isDragging.value = false
-  emit('drag-end')
-
-  // 弹性回弹动画
-  gsap.to(draggerRef.value, {
-    x: anchorPosition.value.x,
-    y: anchorPosition.value.y,
-    duration: 1.2,
-    ease: `elastic.out(${props.elasticity}, 0.3)`,
-    onUpdate: function () {
-      // 在动画每一帧更新线条
-      if (draggerRef.value) {
-        const x = draggerRef.value._gsap?.x || anchorPosition.value.x
-        const y = draggerRef.value._gsap?.y || anchorPosition.value.y
-        updateLine(x, y)
-      }
+  // 创建回弹动画
+  dragAnimation = gsap.to(
+    {
+      x: pointX.value,
+      y: pointY.value,
     },
-    onComplete: () => {
-      emit('reset')
-    }
-  })
-
-  // 线条颜色脉冲效果
-  gsap.to(lineRef.value, {
-    backgroundColor: '#ff4757',
-    duration: 0.3,
-    yoyo: true,
-    repeat: 1,
-    overwrite: true
-  })
-
-  // 清理GSAP上下文
-  if (gsapContext) {
-    gsapContext.revert()
-    gsapContext = null
-  }
-}
-
-// ---------- 清理事件监听 ----------
-const cleanupListeners = () => {
-  if (mouseMoveHandler) {
-    window.removeEventListener('mousemove', mouseMoveHandler)
-    mouseMoveHandler = null
-  }
-  if (mouseUpHandler) {
-    window.removeEventListener('mouseup', mouseUpHandler)
-    mouseUpHandler = null
-  }
-}
-
-// ---------- 重置组件状态 ----------
-const reset = () => {
-  isDragging.value = false
-  cleanupListeners()
-
-  gsap.to([draggerRef.value, lineRef.value], {
-    x: anchorPosition.value.x,
-    y: anchorPosition.value.y,
-    width: 0,
-    rotation: 0,
-    duration: 0.5,
-    overwrite: true
-  })
-
-  if (gsapContext) {
-    gsapContext.revert()
-    gsapContext = null
-  }
-}
-
-// 暴露方法给父组件
-defineExpose({
-  reset,
-  updateAnchorPosition
-})
-
-// ---------- 生命周期钩子 ----------
-onMounted(() => {
-  // 初始化样式
-  gsap.set(lineRef.value, {
-    height: props.lineThickness,
-    transformOrigin: 'left center',
-    backgroundColor: props.color
-  })
-
-  gsap.set([anchorRef.value, draggerRef.value], {
-    width: props.anchorSize,
-    height: props.anchorSize,
-    borderRadius: '50%'
-  })
-
-  gsap.set(draggerRef.value, {
-    backgroundColor: 'transparent',
-    cursor: props.active ? 'grab' : 'default'
-  })
-
-  // 计算初始位置
-  nextTick(() => {
-    updateAnchorPosition()
-  })
-
-  // 监听窗口大小变化
-  window.addEventListener('resize', updateAnchorPosition)
-})
+    {
+      duration: 1.8,
+      x: 400,
+      y: 200,
+      ease: "elastic.out(1.2, 0.1)",
+      onUpdate: function (this: gsap.core.Tween) {
+        pointX.value = this.targets()[0].x;
+        pointY.value = this.targets()[0].y;
+      },
+      onComplete: () => {
+        dragAnimation = null;
+      },
+    },
+  );
+};
 
 onUnmounted(() => {
-  // 清理所有GSAP动画
-  gsap.killTweensOf([lineRef.value, anchorRef.value, draggerRef.value])
-
-  // 清理事件监听
-  cleanupListeners()
-  window.removeEventListener('resize', updateAnchorPosition)
-
-  // 清理GSAP上下文
-  if (gsapContext) {
-    gsapContext.revert()
+  window.removeEventListener("mousemove", onDrag);
+  window.removeEventListener("mouseup", stopDrag);
+  if (dragAnimation) {
+    dragAnimation.kill();
   }
-})
-
-// 监听active状态变化
-watch(() => props.active, (newVal) => {
-  gsap.set(draggerRef.value, {
-    cursor: newVal ? 'grab' : 'default'
-  })
-
-  if (!newVal && isDragging.value) {
-    handleMouseUp()
-  }
-})
-
-// 监听颜色变化
-watch(() => props.color, (newColor) => {
-  gsap.set([lineRef.value, anchorRef.value], {
-    backgroundColor: newColor
-  })
-})
+});
 </script>
 
 <style scoped>
 .rubber-band-container {
-  position: relative;
+  user-select: none;
+  cursor: default;
   width: 100%;
   height: 100%;
-  min-height: 200px;
-  pointer-events: none;
-  /* 容器不拦截事件 */
-}
-
-.rubber-band-line,
-.rubber-band-anchor,
-.rubber-band-dragger {
-  position: absolute;
-  left: 0;
-  top: 0;
-  transform: translate(-50%, -50%);
-  pointer-events: auto;
-  /* 子元素可以接收事件 */
-}
-
-.rubber-band-anchor {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  z-index: 2;
-}
-
-.rubber-band-dragger {
-  z-index: 3;
-}
-
-.rubber-band-line {
-  z-index: 1;
-  transform-origin: left center;
-  will-change: width, transform;
 }
 </style>
