@@ -1,156 +1,261 @@
 <template>
-  <div class="rubber-band-container">
-    <svg width="100%" height="100%" viewBox="0 0 800 400">
-      <line
-        id="rubber-band"
-        x1="50%"
-        y1="0%"
-        :x2="pointX"
-        :y2="pointY"
-        :stroke="lineColor"
-        :stroke-width="lineWidth"
-        stroke-linecap="round"
-      />
-      <circle cx="50%" cy="0%" r="4" fill="gray" />
-      <foreignObject
-        :x="pointX"
-        :y="pointY"
-        width="50"
-        height="50"
-        requiredExtensions="http://www.w3.org/1999/xhtml"
-      >
-        <div xmlns="http://www.w3.org/1999/xhtml" class="image-container">
-          <img
-            src="@/assets/logos/vue-mix-logo.svg"
-            alt="draggable"
-            class="draggable-image"
-            @mousedown="startDrag"
-            :cursor="isDragging ? 'grabbing' : 'grab'"
-            :class="{ dragging: isDragging }"
-          />
-        </div>
-      </foreignObject>
-      <defs>
-        <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
-          <feDropShadow dx="2" dy="2" stdDeviation="2" flood-opacity="0.3" />
-        </filter>
-      </defs>
+  <div class="rubber-band-root" ref="rootEl">
+    <svg class="rubber-band-svg" viewBox="0 0 800 600">
+      <path :d="rubberPath" :stroke="strokeColor" :stroke-width="thickness" stroke-linecap="round" fill="none" />
+      <g>
+        <foreignObject :x="(anchor.x + fixedPointX)" :y="(anchor.y + fixedPointY)" width="56" height="56">
+          <div>
+            <img src="/assets/circle.svg" alt="circle" />
+          </div>
+        </foreignObject>
+      </g>
+      <g class="handle-group" :transform="`translate(${handle.x - 64}, ${handle.y})`">
+        <foreignObject width="128" height="128">
+          <div class="handle" :class="{ dragging: dragging }" @mousedown.prevent="onPointerDown">
+            <img src="/assets/pendant_light.svg" alt="drag" />
+          </div>
+        </foreignObject>
+      </g>
     </svg>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onUnmounted } from "vue";
-import gsap from "gsap";
+import { ref, reactive, computed, onMounted, onUnmounted } from "vue";
 
-const pointX = ref(400);
-const pointY = ref(200);
-const isDragging = ref(false);
-const lineWidth = ref(10);
+const props = withDefaults(
+  defineProps<{
+    length?: number;
+    stiffness?: number;
+    fixedPointX?: number;
+    fixedPointY?: number;
+  }>(),
+  {
+    length: 80,
+    stiffness: 1,
+    fixedPointX: 400,
+    fixedPointY: 60,
+  },
+);
 
-let dragAnimation: gsap.core.Tween | null = null;
+const rootEl = ref<HTMLElement | null>(null);
 
-// 计算线的颜色 - 根据拉伸程度变化
-const lineColor = computed(() => {
-  const distance = Math.sqrt(Math.pow(pointX.value - 100, 2) + Math.pow(pointY.value - 200, 2));
-  // 距离越远颜色越深
-  const intensity = Math.min(distance / 200, 1);
-  return `rgba(139, 69, 19, ${0.5 + intensity * 0.5})`;
+// 顶部固定锚点（始终不动，从这里开始拉）
+const anchor = reactive({ x: props.fixedPointX, y: props.fixedPointY });
+
+// 只有一个末端质点，整根橡皮筋用一条贝塞尔曲线近似
+const handle = reactive({ x: anchor.x, y: anchor.y + props.length });
+
+let vx = 0;
+let vy = 0;
+
+// 物理参数（单质点弹簧 + 重力）
+const MASS = 1;
+const BASE_K = 55; // 基础刚度
+const DAMP = 6; // 阻尼：越大越快停下
+const GRAVITY = 520; // 重力：控制整体下坠感
+
+const dragging = ref(false);
+const thickness = ref(9);
+
+let lastTime = 0;
+let rafId: number | null = null;
+
+// 根据锚点和手柄计算“下垂”的控制点，让整条线始终从锚点发出
+const controlPoint = computed(() => {
+  const midX = (anchor.x + handle.x) / 2;
+  const midY = (anchor.y + handle.y) / 2;
+  const dx = handle.x - anchor.x;
+  const dy = handle.y - anchor.y;
+  const dist = Math.sqrt(dx * dx + dy * dy);
+  const sagBase = Math.min(120, dist * 0.35);
+  const horizontalFactor = 0.25 + Math.abs(dx) / 800;
+
+  return {
+    x: midX + dx * 0.05,
+    y: midY + sagBase * horizontalFactor,
+  };
 });
 
-const startDrag = (e: MouseEvent) => {
-  if (dragAnimation) {
-    dragAnimation.kill();
-    dragAnimation = null;
+const rubberPath = computed(() => {
+  const c = controlPoint.value;
+  return `M ${anchor.x} ${anchor.y} Q ${c.x} ${c.y} ${handle.x} ${handle.y}`;
+});
+
+const strokeColor = computed(() => {
+  const dx = handle.x - anchor.x;
+  const dy = handle.y - anchor.y;
+  const dist = Math.sqrt(dx * dx + dy * dy);
+  const t = Math.min(dist / 260, 1);
+  const r = 255 * (0.35 + 0.35 * t);
+  const g = 190 * (0.8 - 0.5 * t);
+  const b = 120 * (0.65 - 0.3 * t);
+  const alpha = 0.35 + 0.5 * t;
+  return `rgba(${r.toFixed(0)}, ${g.toFixed(0)}, ${b.toFixed(0)}, ${alpha.toFixed(2)})`;
+});
+
+function step(time: number) {
+  const dt = Math.min((time - lastTime) / 1000, 1 / 30);
+  lastTime = time;
+
+  if (!dragging.value) {
+    const restY = anchor.y + props.length;
+    const k = BASE_K * props.stiffness;
+
+    const dx = handle.x - anchor.x;
+    const dy = handle.y - restY; // 平衡位置在 anchor 下方 length 距离
+
+    // 弹簧力 + 阻尼 + 重力
+    const fx = -k * dx - DAMP * vx;
+    const fy = -k * dy - DAMP * vy + GRAVITY * MASS;
+
+    const ax = fx / MASS;
+    const ay = fy / MASS;
+
+    vx += ax * dt;
+    vy += ay * dt;
+
+    handle.x += vx * dt;
+    handle.y += vy * dt;
+
+    // 边界约束，防止飞出视口
+    handle.x = Math.max(80, Math.min(820, handle.x));
+    handle.y = Math.max(80, Math.min(860, handle.y));
+
+    const speed = Math.sqrt(vx * vx + vy * vy);
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    if (speed < 10 && dist < 2) {
+      handle.x = anchor.x;
+      handle.y = restY;
+      vx = 0;
+      vy = 0;
+      rafId = null;
+      return;
+    }
   }
 
-  isDragging.value = true;
-  e.preventDefault();
+  rafId = requestAnimationFrame(step);
+}
 
-  // 拖拽时线变细
-  gsap.to(lineWidth, {
-    duration: 0.2,
-    value: 2,
-    ease: "power2.out",
-  });
-
-  window.addEventListener("mousemove", onDrag);
-  window.addEventListener("mouseup", stopDrag);
-};
-
-const onDrag = (e: MouseEvent) => {
-  if (!isDragging.value) return;
-
-  const svg = document.querySelector("svg");
-  if (!svg) return;
-
-  const pt = svg.createSVGPoint();
-  pt.x = e.clientX;
-  pt.y = e.clientY;
-
-  const ctm = svg.getScreenCTM();
-  if (ctm) {
-    const svgP = pt.matrixTransform(ctm.inverse());
-
-    // 可以限制拖拽范围（可选）
-    // pointX.value = Math.min(700, Math.max(100, svgP.x))
-    // pointY.value = Math.min(350, Math.max(50, svgP.y))
-
-    pointX.value = svgP.x;
-    pointY.value = svgP.y;
+function ensureLoop() {
+  if (rafId == null) {
+    lastTime = performance.now();
+    rafId = requestAnimationFrame(step);
   }
-};
+}
 
-const stopDrag = () => {
-  if (!isDragging.value) return;
+function getSvgCoords(evt: MouseEvent) {
+  const svg = rootEl.value?.querySelector("svg");
+  if (!svg) return { x: handle.x, y: handle.y };
+  const pt = (svg as SVGSVGElement).createSVGPoint();
+  pt.x = evt.clientX;
+  pt.y = evt.clientY;
+  const ctm = (svg as SVGSVGElement).getScreenCTM();
+  if (!ctm) return { x: handle.x, y: handle.y };
+  const p = pt.matrixTransform(ctm.inverse());
+  return {
+    x: Math.max(80, Math.min(720, p.x)),
+    y: Math.max(80, Math.min(360, p.y)),
+  };
+}
 
-  isDragging.value = false;
-  window.removeEventListener("mousemove", onDrag);
-  window.removeEventListener("mouseup", stopDrag);
+function onPointerDown(e: MouseEvent) {
+  dragging.value = true;
+  thickness.value = 7;
 
-  // 恢复线宽
-  gsap.to(lineWidth, {
-    duration: 1.8,
-    value: 10,
-    ease: "power2.in",
-  });
+  const pos = getSvgCoords(e);
+  vx = 0;
+  vy = 0;
+  handle.x = pos.x;
+  handle.y = pos.y;
 
-  // 创建回弹动画
-  dragAnimation = gsap.to(
-    {
-      x: pointX.value,
-      y: pointY.value,
-    },
-    {
-      duration: 1.8,
-      x: 400,
-      y: 200,
-      ease: "elastic.out(1.2, 0.1)",
-      onUpdate: function (this: gsap.core.Tween) {
-        pointX.value = this.targets()[0].x;
-        pointY.value = this.targets()[0].y;
-      },
-      onComplete: () => {
-        dragAnimation = null;
-      },
-    },
-  );
-};
+  window.addEventListener("mousemove", onPointerMove);
+  window.addEventListener("mouseup", onPointerUp);
+}
+
+function onPointerMove(e: MouseEvent) {
+  if (!dragging.value) return;
+  const pos = getSvgCoords(e);
+  const now = performance.now();
+  const dt = Math.min((now - lastTime) / 1000, 1 / 30) || 1 / 60;
+
+  vx = (pos.x - handle.x) / dt;
+  vy = (pos.y - handle.y) / dt;
+
+  handle.x = pos.x;
+  handle.y = pos.y;
+}
+
+function onPointerUp() {
+  if (!dragging.value) return;
+  dragging.value = false;
+  thickness.value = 9;
+  window.removeEventListener("mousemove", onPointerMove);
+  window.removeEventListener("mouseup", onPointerUp);
+  ensureLoop();
+}
+
+onMounted(() => {
+  handle.x = anchor.x;
+  handle.y = anchor.y + props.length;
+  ensureLoop();
+});
 
 onUnmounted(() => {
-  window.removeEventListener("mousemove", onDrag);
-  window.removeEventListener("mouseup", stopDrag);
-  if (dragAnimation) {
-    dragAnimation.kill();
-  }
+  window.removeEventListener("mousemove", onPointerMove);
+  window.removeEventListener("mouseup", onPointerUp);
+  if (rafId != null) cancelAnimationFrame(rafId);
 });
 </script>
 
 <style scoped>
-.rubber-band-container {
-  user-select: none;
-  cursor: default;
+.rubber-band-root {
   width: 100%;
   height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+}
+
+.rubber-band-svg {
+  width: 100%;
+  height: 100%;
+}
+
+.handle-group {
+  width: 128px;
+  height: 128px;
+}
+
+.handle {
+  width: 128px;
+  height: 128px;
+  border-radius: 999px;
+  background: radial-gradient(circle at 30% 20%, #ffffff, #d9e4ff 35%, #7a8cff 100%);
+  box-shadow:
+    0 10px 25px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  overflow: hidden;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.handle.dragging {
+  cursor: grabbing;
+  transform: scale(1.02);
+  box-shadow:
+    0 14px 32px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(255, 255, 255, 0.4);
+}
+
+.handle img {
+  width: 128px;
+  height: 128px;
 }
 </style>

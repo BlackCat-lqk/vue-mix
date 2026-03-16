@@ -1,5 +1,5 @@
 // Highlighted sidebar items
-export const NEW = ["Flow Border"];
+export const NEW = ["Flow Border", "Skeleton Loader"];
 export const UPDATED = ["Metallic Paint"];
 
 // Used for main sidebar navigation
@@ -14,6 +14,6 @@ export const CATEGORIES = [
   },
   {
     name: "Components",
-    subcategories: ["Rubber Band"],
+    subcategories: ["Rubber Band", "Skeleton Loader"],
   },
 ];

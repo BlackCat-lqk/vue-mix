@@ -2,12 +2,12 @@
   <TabbedLayout>
     <template #preview>
       <div class="demo-container h-[400px] overflow-hidden">
-        <RubberBand></RubberBand>
+        <RubberBand :length="length" :stiffness="stiffness" />
       </div>
 
       <Customize>
-        <PreviewSlider title="Line Size" v-model="lineSize" :min="1" :max="20" :step="1" />
-
+        <PreviewSlider title="Length" v-model="length" :min="80" :max="260" :step="10" />
+        <PreviewSlider title="Stiffness" v-model="stiffness" :min="0.4" :max="2.2" :step="0.1" />
       </Customize>
 
       <PropTable :data="propData" />
@@ -34,13 +34,27 @@ import Customize from '@/components/common/Customize.vue';
 import PreviewSlider from '@/components/common/PreviewSlider.vue';
 import CliInstallation from '@/components/code/CliInstallation.vue';
 
-const lineSize = ref(4);
+const length = ref(180);
+const stiffness = ref(1);
+
 const propData = [
   {
     name: 'className',
     type: 'string',
     default: '',
     description: 'Custom class name(s) applied to the container element.'
+  },
+  {
+    name: 'length',
+    type: 'number',
+    default: '180',
+    description: 'Rest length from anchor to handle (in px).'
+  },
+  {
+    name: 'stiffness',
+    type: 'number',
+    default: '1',
+    description: 'Relative spring stiffness, higher means snappier rebound.'
   },
 ];
 </script>

@@ -4,6 +4,7 @@ const animations = {
 };
 const components = {
   "rubber-band": () => import("../demo/Components/RubberBandDemo.vue"),
+  "skeleton-loader": () => import("../demo/Components/SkeletonLoaderDemo.vue"),
 };
 export const componentMap = {
   ...animations,
