@@ -1,18 +1,26 @@
 <template>
   <div class="rubber-band-root" ref="rootEl">
     <svg class="rubber-band-svg" viewBox="0 0 800 600">
-      <path :d="rubberPath" :stroke="strokeColor" :stroke-width="thickness" stroke-linecap="round" fill="none" />
-      <g>
-        <foreignObject :x="(anchor.x + fixedPointX)" :y="(anchor.y + fixedPointY)" width="56" height="56">
-          <div>
-            <img src="/assets/circle.svg" alt="circle" />
+      <slot name="band" :d="rubberPath" :stroke="strokeColor" :stroke-width="currentBandWidth" :dragging="dragging">
+        <path :d="rubberPath" :stroke="strokeColor" :stroke-width="currentBandWidth" stroke-linecap="round"
+          fill="none" />
+      </slot>
+
+      <g class="anchor">
+        <foreignObject :x="anchor.x - anchorSize / 2" :y="anchor.y - anchorSize / 2" :width="anchorSize"
+          :height="anchorSize">
+          <div class="anchor-content">
+            <slot name="anchor" :dragging="dragging">
+            </slot>
           </div>
         </foreignObject>
       </g>
-      <g class="handle-group" :transform="`translate(${handle.x - 64}, ${handle.y})`">
-        <foreignObject width="128" height="128">
-          <div class="handle" :class="{ dragging: dragging }" @mousedown.prevent="onPointerDown">
-            <img src="/assets/pendant_light.svg" alt="drag" />
+
+      <g class="handle-group" :transform="`translate(${handle.x - handleSize / 2}, ${handle.y - handleSize / 2})`">
+        <foreignObject :width="handleSize" :height="handleSize">
+          <div class="handle-main-box" :class="{ dragging: dragging }" @pointerdown.prevent="onPointerDown">
+            <slot name="handle" :dragging="dragging">
+            </slot>
           </div>
         </foreignObject>
       </g>
@@ -21,47 +29,52 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted, onUnmounted } from "vue";
+import { computed, onMounted, onUnmounted, reactive, ref, watch } from "vue";
+import { gsap } from "gsap";
 
 const props = withDefaults(
   defineProps<{
+    anchorX?: number;
+    anchorY?: number;
     length?: number;
-    stiffness?: number;
-    fixedPointX?: number;
-    fixedPointY?: number;
+    bandWidth?: number;
+    dragBandWidth?: number;
+    elasticity?: number;
+    returnDuration?: number;
+    handleSize?: number;
+    anchorSize?: number;
+    dragMinX?: number;
+    dragMaxX?: number;
+    dragMinY?: number;
+    dragMaxY?: number;
   }>(),
   {
+    anchorX: 400,
+    anchorY: 60,
     length: 80,
-    stiffness: 1,
-    fixedPointX: 400,
-    fixedPointY: 60,
+    bandWidth: 9,
+    dragBandWidth: 7,
+    elasticity: 0.4,
+    returnDuration: 0.9,
+    handleSize: 128,
+    anchorSize: 56,
   },
 );
 
+const emit = defineEmits<{
+  (e: "drag-start", payload: { x: number; y: number }): void;
+  (e: "drag-move", payload: { x: number; y: number }): void;
+  (e: "drag-end", payload: { x: number; y: number }): void;
+}>();
+
 const rootEl = ref<HTMLElement | null>(null);
 
-// 顶部固定锚点（始终不动，从这里开始拉）
-const anchor = reactive({ x: props.fixedPointX, y: props.fixedPointY });
+const anchor = reactive({ x: props.anchorX, y: props.anchorY });
 
-// 只有一个末端质点，整根橡皮筋用一条贝塞尔曲线近似
 const handle = reactive({ x: anchor.x, y: anchor.y + props.length });
 
-let vx = 0;
-let vy = 0;
-
-// 物理参数（单质点弹簧 + 重力）
-const MASS = 1;
-const BASE_K = 55; // 基础刚度
-const DAMP = 6; // 阻尼：越大越快停下
-const GRAVITY = 520; // 重力：控制整体下坠感
-
 const dragging = ref(false);
-const thickness = ref(9);
 
-let lastTime = 0;
-let rafId: number | null = null;
-
-// 根据锚点和手柄计算“下垂”的控制点，让整条线始终从锚点发出
 const controlPoint = computed(() => {
   const midX = (anchor.x + handle.x) / 2;
   const midY = (anchor.y + handle.y) / 2;
@@ -94,57 +107,9 @@ const strokeColor = computed(() => {
   return `rgba(${r.toFixed(0)}, ${g.toFixed(0)}, ${b.toFixed(0)}, ${alpha.toFixed(2)})`;
 });
 
-function step(time: number) {
-  const dt = Math.min((time - lastTime) / 1000, 1 / 30);
-  lastTime = time;
+const currentBandWidth = computed(() => (dragging.value ? props.dragBandWidth : props.bandWidth));
 
-  if (!dragging.value) {
-    const restY = anchor.y + props.length;
-    const k = BASE_K * props.stiffness;
-
-    const dx = handle.x - anchor.x;
-    const dy = handle.y - restY; // 平衡位置在 anchor 下方 length 距离
-
-    // 弹簧力 + 阻尼 + 重力
-    const fx = -k * dx - DAMP * vx;
-    const fy = -k * dy - DAMP * vy + GRAVITY * MASS;
-
-    const ax = fx / MASS;
-    const ay = fy / MASS;
-
-    vx += ax * dt;
-    vy += ay * dt;
-
-    handle.x += vx * dt;
-    handle.y += vy * dt;
-
-    // 边界约束，防止飞出视口
-    handle.x = Math.max(80, Math.min(820, handle.x));
-    handle.y = Math.max(80, Math.min(860, handle.y));
-
-    const speed = Math.sqrt(vx * vx + vy * vy);
-    const dist = Math.sqrt(dx * dx + dy * dy);
-    if (speed < 10 && dist < 2) {
-      handle.x = anchor.x;
-      handle.y = restY;
-      vx = 0;
-      vy = 0;
-      rafId = null;
-      return;
-    }
-  }
-
-  rafId = requestAnimationFrame(step);
-}
-
-function ensureLoop() {
-  if (rafId == null) {
-    lastTime = performance.now();
-    rafId = requestAnimationFrame(step);
-  }
-}
-
-function getSvgCoords(evt: MouseEvent) {
+function getSvgCoords(evt: PointerEvent) {
   const svg = rootEl.value?.querySelector("svg");
   if (!svg) return { x: handle.x, y: handle.y };
   const pt = (svg as SVGSVGElement).createSVGPoint();
@@ -153,59 +118,82 @@ function getSvgCoords(evt: MouseEvent) {
   const ctm = (svg as SVGSVGElement).getScreenCTM();
   if (!ctm) return { x: handle.x, y: handle.y };
   const p = pt.matrixTransform(ctm.inverse());
+
+  const clamp = (v: number, min?: number, max?: number) => {
+    if (typeof min === "number") v = Math.max(min, v);
+    if (typeof max === "number") v = Math.min(max, v);
+    return v;
+  };
+
   return {
-    x: Math.max(80, Math.min(720, p.x)),
-    y: Math.max(80, Math.min(360, p.y)),
+    x: clamp(p.x, props.dragMinX, props.dragMaxX),
+    y: clamp(p.y, props.dragMinY, props.dragMaxY),
   };
 }
 
-function onPointerDown(e: MouseEvent) {
+function onPointerDown(e: PointerEvent) {
   dragging.value = true;
-  thickness.value = 7;
+  gsap.killTweensOf(handle);
 
   const pos = getSvgCoords(e);
-  vx = 0;
-  vy = 0;
   handle.x = pos.x;
   handle.y = pos.y;
+  emit("drag-start", { x: handle.x, y: handle.y });
 
-  window.addEventListener("mousemove", onPointerMove);
-  window.addEventListener("mouseup", onPointerUp);
+  window.addEventListener("pointermove", onPointerMove, { passive: true });
+  window.addEventListener("pointerup", onPointerUp, { passive: true });
+  window.addEventListener("pointercancel", onPointerUp, { passive: true });
 }
 
-function onPointerMove(e: MouseEvent) {
+function onPointerMove(e: PointerEvent) {
   if (!dragging.value) return;
   const pos = getSvgCoords(e);
-  const now = performance.now();
-  const dt = Math.min((now - lastTime) / 1000, 1 / 30) || 1 / 60;
-
-  vx = (pos.x - handle.x) / dt;
-  vy = (pos.y - handle.y) / dt;
-
   handle.x = pos.x;
   handle.y = pos.y;
+  emit("drag-move", { x: handle.x, y: handle.y });
 }
 
 function onPointerUp() {
   if (!dragging.value) return;
   dragging.value = false;
-  thickness.value = 9;
-  window.removeEventListener("mousemove", onPointerMove);
-  window.removeEventListener("mouseup", onPointerUp);
-  ensureLoop();
+
+  window.removeEventListener("pointermove", onPointerMove);
+  window.removeEventListener("pointerup", onPointerUp);
+  window.removeEventListener("pointercancel", onPointerUp);
+  emit("drag-end", { x: handle.x, y: handle.y });
+
+  gsap.to(handle, {
+    x: anchor.x,
+    y: anchor.y + props.length,
+    duration: props.returnDuration,
+    ease: `elastic.out(1, ${props.elasticity})`,
+  });
 }
 
 onMounted(() => {
   handle.x = anchor.x;
   handle.y = anchor.y + props.length;
-  ensureLoop();
 });
 
 onUnmounted(() => {
-  window.removeEventListener("mousemove", onPointerMove);
-  window.removeEventListener("mouseup", onPointerUp);
-  if (rafId != null) cancelAnimationFrame(rafId);
+  window.removeEventListener("pointermove", onPointerMove);
+  window.removeEventListener("pointerup", onPointerUp);
+  window.removeEventListener("pointercancel", onPointerUp);
+  gsap.killTweensOf(handle);
 });
+
+watch(
+  () => [props.anchorX, props.anchorY, props.length] as const,
+  ([x, y, length]) => {
+    anchor.x = x;
+    anchor.y = y;
+    if (!dragging.value) {
+      gsap.killTweensOf(handle);
+      handle.x = anchor.x;
+      handle.y = anchor.y + length;
+    }
+  },
+);
 </script>
 
 <style scoped>
@@ -224,38 +212,20 @@ onUnmounted(() => {
 }
 
 .handle-group {
-  width: 128px;
-  height: 128px;
+  width: 0;
+  height: 0;
 }
 
-.handle {
-  width: 128px;
-  height: 128px;
-  border-radius: 999px;
-  background: radial-gradient(circle at 30% 20%, #ffffff, #d9e4ff 35%, #7a8cff 100%);
-  box-shadow:
-    0 10px 25px rgba(0, 0, 0, 0.3),
-    0 0 0 1px rgba(255, 255, 255, 0.35);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: grab;
-  overflow: hidden;
-  transition:
-    transform 0.15s ease,
-    box-shadow 0.15s ease;
+.handle-main-box {
+  width: 100%;
+  height: 100%;
 }
 
-.handle.dragging {
+.dragging {
   cursor: grabbing;
   transform: scale(1.02);
   box-shadow:
     0 14px 32px rgba(0, 0, 0, 0.45),
     0 0 0 1px rgba(255, 255, 255, 0.4);
-}
-
-.handle img {
-  width: 128px;
-  height: 128px;
 }
 </style>

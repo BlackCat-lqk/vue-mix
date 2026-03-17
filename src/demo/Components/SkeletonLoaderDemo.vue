@@ -1,22 +1,23 @@
 <template>
   <TabbedLayout>
     <template #preview>
-      <div class="demo-container h-[400px] overflow-hidden">
-        <SkeletonLoader
-          :preset="preset"
-          :animated="animated"
-          :lines="lines"
-          :items="items"
-          :rows="rows"
-          :cols="cols"
-          :height="height"
-          :gap="gap"
-          :speed="speed"
-          :radius="radius"
-          :base-color="baseColor"
-          :highlight-color="highlightColor"
-          :last-line-width="lastLineWidth"
-        />
+      <div class="demo-container h-[auto] overflow-hidden">
+        <!-- <SkeletonLoader :preset="preset" :animated="animated" :lines="lines" :items="items" :rows="rows" :cols="cols"
+          :height="height" :gap="gap" :speed="speed" :radius="radius" :base-color="baseColor"
+          :highlight-color="highlightColor" :last-line-width="lastLineWidth" /> -->
+        <SkeletonLoader preset="text" :animated="animated" :lines="lines" :items="items" :rows="rows" :cols="cols"
+          :height="height" :gap="gap" :speed="speed" :radius="radius" :base-color="baseColor"
+          :highlight-color="highlightColor" :last-line-width="lastLineWidth" />
+        <SkeletonLoader preset="avatar" :animated="animated" :lines="lines" :items="items" :rows="rows" :cols="cols"
+          :height="height" :gap="gap" :speed="speed" :radius="radius" :base-color="baseColor"
+          :highlight-color="highlightColor" :last-line-width="lastLineWidth" />
+        <SkeletonLoader preset="card" :animated="animated" :lines="lines" :items="items" :rows="rows" :cols="cols"
+          :height="height" :gap="gap" :speed="speed" :radius="radius" :base-color="baseColor"
+          :highlight-color="highlightColor" :last-line-width="lastLineWidth" />
+        <SkeletonLoader preset="grid" :animated="animated" :lines="lines" :items="items" :rows="rows" :cols="cols"
+          :height="height" :gap="gap" :speed="speed" :radius="radius" :base-color="baseColor"
+          :highlight-color="highlightColor" :last-line-width="lastLineWidth" />
+
       </div>
 
       <Customize>
